@@ -38,6 +38,32 @@ const promptTemplates = [
     "Cover the ground in a layer of morning mist"
 ];
 
+const ApiKeyMissingScreen = () => (
+    <div className="w-full h-screen flex flex-col items-center justify-center p-8 text-center" style={{backgroundColor: 'var(--color-bg-dark)', color: 'var(--color-text-primary)'}}>
+        <Icon icon="logo" className="w-16 h-16 mb-4 text-pink-400" />
+        <h1 className="text-4xl font-bold mb-2">Configuration Needed</h1>
+        <p className="text-lg text-slate-400 mb-6 max-w-2xl">
+            This application requires a Google Gemini API key to function.
+        </p>
+        <div className="neumorphic-panel p-6 text-left max-w-3xl w-full">
+            <h2 className="text-xl font-semibold mb-3 text-pink-400">How to fix this:</h2>
+            <ol className="list-decimal list-inside space-y-3 text-slate-300">
+                <li>Open the <code className="bg-gray-900/50 px-2 py-1 rounded font-mono text-sm">index.html</code> file in your project editor.</li>
+                <li>Find the script tag near the top of the <code className="bg-gray-900/50 px-2 py-1 rounded font-mono text-sm">&lt;body&gt;</code>.</li>
+                <li>
+                    Replace the placeholder <code className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-mono text-sm">"YOUR_API_KEY_HERE"</code> with your actual Google Gemini API key.
+                </li>
+            </ol>
+            <p className="mt-6 text-slate-400 text-sm">
+                Your API key is only used in your browser and is not stored or shared. For security, avoid committing your <code className="bg-gray-900/50 px-1 py-0.5 rounded text-xs">index.html</code> file with the key to a public repository.
+            </p>
+        </div>
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="mt-8 gradient-button-primary px-6 py-3">
+            Get an API Key
+        </a>
+    </div>
+);
+
 const fileToB64 = (file: File) => new Promise<{ b64: string; mime: string }>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -61,6 +87,7 @@ const loadImageFromFile = (file: File) => new Promise<{ element: HTMLImageElemen
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(false);
   const [activeTool, setActiveTool] = useState<Tool>(Tool.INPAINT);
   const [activeInpaintTool, setActiveInpaintTool] = useState<InpaintTool>(InpaintTool.BRUSH);
   const [brushSize, setBrushSize] = useState<number>(40);
@@ -104,6 +131,11 @@ function App() {
   }, [history, historyIndex]);
 
   useEffect(() => {
+    const apiKey = process.env.API_KEY;
+    if (apiKey && apiKey !== 'YOUR_API_KEY_HERE' && apiKey.trim() !== '') {
+      setIsApiKeyConfigured(true);
+    }
+
     const timer = setTimeout(() => setShowSplash(false), 5000);
     return () => clearTimeout(timer);
   }, []);
@@ -595,6 +627,7 @@ function App() {
 
 
   if (showSplash) return <SplashScreen />;
+  if (!isApiKeyConfigured) return <ApiKeyMissingScreen />;
   if (!originalImage) return <WelcomeScreen onImageUpload={initialImageLoad} />;
   
   const generativeTools = [Tool.INPAINT, Tool.MAGIC_ERASE, Tool.EXPAND];

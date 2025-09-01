@@ -274,6 +274,23 @@
 <link rel="stylesheet" href="/index.css">
 </head>
   <body>
+    <script>
+      // A polyfill for process.env for client-side execution
+      if (typeof window.process === 'undefined') {
+        window.process = { env: {} };
+      }
+      
+      // --- IMPORTANT SETUP ---
+      // For the application to function, you must provide your Google Gemini API key.
+      // 1. Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
+      // 2. Replace "YOUR_API_KEY_HERE" with your actual key.
+      //
+      // For production use, it is highly recommended to manage this key via a secure
+      // build process or backend proxy, rather than exposing it in client-side code.
+      if (!window.process.env.API_KEY) {
+        window.process.env.API_KEY = 'YOUR_API_KEY_HERE';
+      }
+    </script>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
